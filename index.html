@@ -172,7 +172,7 @@
         <main id="view-detail" class="flex-1 overflow-y-auto no-scrollbar bg-slate-50 dark:bg-slate-950 hidden relative">
             <div class="sticky top-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20 px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3 flex-1 overflow-hidden">
-                    <button onclick="window.handleDetailBack()" class="p-2 text-slate-600 dark:text-slate-400 active:scale-90 transition-transform"><i data-lucide="chevron-left" class="w-7 h-7"></i></button>
+                    <button onclick="window.handleDetailBack()" class="p-2 text-slate-600 dark:text-slate-400 active:scale-90"><i data-lucide="chevron-left" class="w-7 h-7"></i></button>
                     <div class="flex flex-col">
                         <h1 id="detail-title" class="font-bold text-lg text-slate-800 dark:text-white truncate leading-tight">Detail</h1>
                         <span id="detail-category-badge" class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest hidden mt-0.5">✈️ Liburan</span>
@@ -1093,14 +1093,13 @@
             }
         }
 
-        // OPTIMASI: Class Checking pada timeout agar Pop Up tidak menutup sendiri kalau baru saja di-open
         window.closeAllModals = () => {
             modalIds.forEach(id => { 
                 const m = document.getElementById(id); 
                 if(m) {
                     if (id === 'modal-receipt' || id === 'modal-mini-profile') {
                         m.classList.add('opacity-0');
-                        setTimeout(() => { if (m.classList.contains('opacity-0')) m.classList.add('hidden'); }, 300);
+                        setTimeout(() => m.classList.add('hidden'), 300);
                         
                         const card = m.children[0]; 
                         if (card && card.classList.contains('scale-100')) {
@@ -1111,12 +1110,11 @@
                         m.classList.add('hidden');
                     } else {
                         m.classList.add('translate-y-full');
-                        setTimeout(() => { if (m.classList.contains('translate-y-full')) m.classList.add('hidden'); }, 300);
+                        setTimeout(() => m.classList.add('hidden'), 300);
                     }
                 }
             });
-            const overlay = document.getElementById('modal-overlay'); 
-            if(overlay && !overlay.classList.contains('opacity-0')) overlay.classList.add('hidden');
+            const overlay = document.getElementById('modal-overlay'); if(overlay) overlay.classList.add('hidden');
             window.closeConfirmModal(); 
         };
 
@@ -2063,36 +2061,25 @@
                     }
                 }
 
-                // OPTIMASI: Bubble padding & Reply styling
                 let replyHtmlMe = '';
                 let replyHtmlOther = '';
-                let bubbleClassMe = 'px-3.5 py-2';
-                let bubbleClassOther = 'px-3.5 py-2';
-                let textWrapperStart = '';
-                let textWrapperEnd = '';
-
                 if (m.replyTo) {
-                    bubbleClassMe = 'p-1.5';
                     replyHtmlMe = `
-                    <div class="mb-1 px-3 py-2 bg-black/15 rounded-xl flex flex-col border-l-[3px] border-indigo-300 text-left">
-                        <span class="text-[10px] font-black text-indigo-100 leading-none mb-1.5">${m.replyTo.name}</span>
+                    <div class="mb-1 p-2 bg-black/20 rounded-md flex flex-col border-l-4 border-indigo-300 text-left">
+                        <span class="text-[10px] font-black text-indigo-100 leading-none mb-1">${m.replyTo.name}</span>
                         <span class="text-[11px] text-white/90 line-clamp-1 leading-tight">${m.replyTo.message}</span>
                     </div>`;
-                    
-                    bubbleClassOther = 'p-1.5';
                     replyHtmlOther = `
-                    <div class="mb-1 px-3 py-2 bg-indigo-50 dark:bg-slate-800 rounded-xl flex flex-col border-l-[3px] border-indigo-500 text-left">
-                        <span class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 leading-none mb-1.5">${m.replyTo.name}</span>
+                    <div class="mb-1 p-2 bg-indigo-50 dark:bg-slate-800 rounded-md flex flex-col border-l-4 border-indigo-500 text-left">
+                        <span class="text-[10px] font-black text-indigo-600 dark:text-indigo-400 leading-none mb-1">${m.replyTo.name}</span>
                         <span class="text-[11px] text-slate-700 dark:text-slate-300 line-clamp-1 leading-tight">${m.replyTo.message}</span>
                     </div>`;
-                    
-                    textWrapperStart = `<div class="px-2 pb-0.5 pt-0.5">`;
-                    textWrapperEnd = `</div>`;
                 }
 
                 const safeMsg = window.safeStr(m.message);
                 const replyActionParams = `'${m.id || m.timestamp}', '${window.safeStr(isMe?'Anda':m.name)}', \`${safeMsg}\``;
 
+                // OPTIMASI: px-3.5 py-2 untuk fit tinggi bubble
                 if(isMe) {
                     chatHtml += `
                     <div class="relative w-full mb-2 chat-swipe-container overflow-x-hidden" 
@@ -2112,7 +2099,7 @@
                             <span class="text-[9px] text-slate-400 font-bold mb-1 mr-1 pointer-events-none">Anda</span>
                             ${m.type === 'sticker' 
                                 ? `<div class="text-6xl cursor-pointer pointer-events-auto ${animClass}" data-animating="${dataAnim}" onclick="window.animateSticker(this)">${m.message}</div>` 
-                                : `<div class="chat-bubble-me ${bubbleClassMe} text-sm font-bold shadow-sm whitespace-pre-wrap text-left pointer-events-auto w-fit max-w-[85%] break-words ${isMentioned ? 'ring-2 ring-rose-400' : ''}">${replyHtmlMe}${textWrapperStart}${formattedMsg}${textWrapperEnd}</div>`
+                                : `<div class="chat-bubble-me px-3.5 py-2 text-sm font-bold shadow-sm whitespace-pre-wrap text-left pointer-events-auto w-fit max-w-[85%] break-words ${isMentioned ? 'ring-2 ring-rose-400' : ''}">${replyHtmlMe}${formattedMsg}</div>`
                             }
                         </div>
                     </div>`;
@@ -2138,7 +2125,7 @@
                             </div>
                             ${m.type === 'sticker' 
                                 ? `<div class="text-6xl cursor-pointer pointer-events-auto ml-7 ${animClass}" data-animating="${dataAnim}" onclick="window.animateSticker(this)">${m.message}</div>` 
-                                : `<div class="chat-bubble-other ${bubbleClassOther} text-sm font-bold shadow-sm whitespace-pre-wrap ml-7 pointer-events-auto w-fit max-w-[85%] break-words ${isMentioned ? 'ring-2 ring-rose-400' : ''}">${replyHtmlOther}${textWrapperStart}${formattedMsg}${textWrapperEnd}</div>`
+                                : `<div class="chat-bubble-other px-3.5 py-2 text-sm font-bold shadow-sm whitespace-pre-wrap ml-7 pointer-events-auto w-fit max-w-[85%] break-words ${isMentioned ? 'ring-2 ring-rose-400' : ''}">${replyHtmlOther}${formattedMsg}</div>`
                             }
                         </div>
                     </div>`;
@@ -2285,7 +2272,7 @@
                     const char = m.avatar.emoji || m.name.charAt(0).toUpperCase();
                     const isMe = m.uid === appData.uid;
                     
-                    // OPTIMASI: Avatar dapat diklik untuk memunculkan Modal Mini Profile
+                    // Avatar dapat diklik untuk memunculkan Modal Mini Profile
                     pile.innerHTML += `
                     <div class="relative transition-transform cursor-pointer hover:-translate-y-1" onclick="window.openMiniProfile('${m.uid}')" title="${m.name}">
                         <div class="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center text-xs font-black shadow-sm ${m.avatar.colorClass} ${m.avatar.textClass}">${char}</div>
@@ -2493,7 +2480,7 @@
                 card.classList.add('scale-95');
                 m.classList.remove('opacity-100');
                 m.classList.add('opacity-0');
-                setTimeout(() => { if (m.classList.contains('opacity-0')) m.classList.add('hidden'); }, 300);
+                setTimeout(() => m.classList.add('hidden'), 300);
             }
         };
 
@@ -2551,7 +2538,7 @@
             const rm = document.getElementById('modal-receipt');
             if(rm) {
                 rm.classList.add('opacity-0');
-                setTimeout(() => { if(rm.classList.contains('opacity-0')) rm.classList.add('hidden'); }, 300);
+                setTimeout(() => rm.classList.add('hidden'), 300);
             }
         };
 
@@ -2627,19 +2614,7 @@
                 await setDoc(doc(db, "history", trxId), h);
                 
                 window.closeConfirmModal();
-                
-                const mTrx = document.getElementById('modal-transaction');
-                if (mTrx) {
-                    mTrx.classList.add('translate-y-full');
-                    setTimeout(() => { if(mTrx.classList.contains('translate-y-full')) mTrx.classList.add('hidden'); }, 300);
-                }
-                const mAction = document.getElementById('modal-action-sheet');
-                if (mAction) {
-                    mAction.classList.add('translate-y-full');
-                    setTimeout(() => { if(mAction.classList.contains('translate-y-full')) mAction.classList.add('hidden'); }, 300);
-                }
-                const overlay = document.getElementById('modal-overlay'); 
-                if(overlay) overlay.classList.add('hidden');
+                window.closeAllModals();
                 
                 const rAmount = document.getElementById('receipt-amount');
                 const rName = document.getElementById('receipt-name');
@@ -3171,4 +3146,216 @@
             };
 
             chatContainer.addEventListener('touchend', endSwipe);
-            chatContainer.addEventListener('
+            chatContainer.addEventListener('touchcancel', endSwipe);
+        };
+
+        window.openAvatarModal = () => {
+            tempAvatarSelection = { ...appData.avatar };
+            const COLORS = [
+                {bg:'bg-indigo-100', txt:'text-indigo-700'}, {bg:'bg-rose-100', txt:'text-rose-700'}, 
+                {bg:'bg-emerald-100', txt:'text-emerald-700'}, {bg:'bg-amber-100', txt:'text-amber-700'}, 
+                {bg:'bg-purple-100', txt:'text-purple-700'}, {bg:'bg-slate-200', txt:'text-slate-700'},
+                {bg:'bg-sky-100', txt:'text-sky-700'}, {bg:'bg-fuchsia-100', txt:'text-fuchsia-700'}
+            ];
+            const colorDiv = document.getElementById('color-options');
+            if (colorDiv) {
+                colorDiv.innerHTML = '';
+                COLORS.forEach(c => {
+                    const b = document.createElement('button'); b.className = `color-btn w-14 h-14 rounded-full border-4 ${c.bg} shrink-0 transition-all active:scale-90`;
+                    b.onclick = () => { 
+                        document.querySelectorAll('#color-options button').forEach(x => x.classList.remove('selected')); 
+                        b.classList.add('selected'); 
+                        tempAvatarSelection.colorClass = c.bg; 
+                        tempAvatarSelection.textClass = c.txt; 
+                    };
+                    if(tempAvatarSelection.colorClass === c.bg) b.classList.add('selected'); 
+                    colorDiv.appendChild(b);
+                });
+            }
+
+            const EMOJIS = ['A', '🐱', '🐶', '🦊', '🦄', '🦖', '🐮', '🐸', '👽', '🍣', '🍔', '🍕', '🍜', '🍟', '🍦', '🍩', '☕', '🐼', '🐯', '🤖', '👾', '👻', '🚀', '🎸', '⚽', '😎', '🥸', '🦁', '🦉', '🦋'];
+            const emojiDiv = document.getElementById('emoji-options');
+            if (emojiDiv) {
+                emojiDiv.innerHTML = '';
+                EMOJIS.forEach(e => {
+                    const b = document.createElement('button'); b.className = `emoji-btn p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-2xl border-2 border-transparent active:scale-90 flex items-center justify-center`;
+                    b.innerText = e === 'A' ? 'Ab' : e;
+                    b.onclick = () => { 
+                        document.querySelectorAll('#emoji-options button').forEach(x => x.classList.remove('selected')); 
+                        b.classList.add('selected'); 
+                        tempAvatarSelection.emoji = (e === 'A') ? '' : e; 
+                    };
+                    if((e === 'A' && !tempAvatarSelection.emoji) || (e === tempAvatarSelection.emoji)) b.classList.add('selected');
+                    emojiDiv.appendChild(b);
+                });
+            }
+            window.showModal('modal-avatar');
+        }
+
+        window.saveAvatarSelection = async () => { 
+            appData.avatar = { ...tempAvatarSelection };
+            window.saveLocal(); 
+            updateUI(); 
+            window.closeAllModals(); 
+            window.showToast("Berhasil disimpan!"); 
+            if(appData.uid) {
+                try { 
+                    await updateDoc(doc(db, "users", appData.uid), { avatar: appData.avatar }); 
+                    await syncUserToRooms(appData.uid, appData.user, appData.avatar);
+                } catch(e) {}
+            }
+        };
+
+        window.formatLastSeen = (timestamp, locale = 'id') => {
+            if (!timestamp) return locale === 'id' ? "Belum pernah online" : "Never been online";
+            const now = new Date();
+            const lastSeenDate = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+
+            const isToday = now.toDateString() === lastSeenDate.toDateString();
+            const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+            const isYesterday = yesterday.toDateString() === lastSeenDate.toDateString();
+
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+            const timeString = lastSeenDate.toLocaleTimeString(locale === 'id' ? 'id-ID' : 'en-US', timeOptions);
+            const prefix = locale === 'id' ? 'Terakhir dilihat ' : 'Last seen ';
+
+            if (diffInSeconds < 60) return locale === 'id' ? 'Baru saja dilihat' : 'Seen just now';
+            if (diffInMinutes < 60) return locale === 'id' ? `${diffInMinutes} menit yang lalu` : `${diffInMinutes} minutes ago`;
+            if (isToday) return `${prefix}${locale === 'id' ? 'hari ini pukul' : 'today at'} ${timeString}`;
+            if (isYesterday) return `${prefix}${locale === 'id' ? 'kemarin pukul' : 'yesterday at'} ${timeString}`;
+
+            const dayOptions = { weekday: 'long' };
+            const dayString = lastSeenDate.toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', dayOptions);
+            const textAt = locale === 'id' ? 'pukul' : 'at';
+            return `${prefix}${dayString} ${textAt} ${timeString}`;
+        };
+
+        window.updateOnlineStatus = async (status) => {
+            if (!appData.uid) return;
+            try {
+                await updateDoc(doc(db, "users", appData.uid), {
+                    isOnline: status,
+                    lastSeen: Date.now()
+                });
+            } catch (e) {}
+        };
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                window.updateOnlineStatus(true);
+            } else {
+                window.updateOnlineStatus(false);
+            }
+        });
+
+        window.addEventListener("beforeunload", () => {
+            window.updateOnlineStatus(false);
+        });
+
+        window.calculateUserDeposit = (roomId, userName) => {
+            const roomHistory = globalHistory.filter(h => h.roomId === roomId && h.userName === userName);
+            let total = 0;
+            roomHistory.forEach(h => {
+                if (h.type === 'in') total += h.amount;
+                if (h.type === 'out') total -= h.amount; 
+            });
+            return total;
+        };
+
+        window.openMemberListModal = async () => {
+            if (!currentRoomId) return;
+            const r = globalRooms.find(x => x.id === currentRoomId);
+            if (!r || !r.members) return;
+
+            const container = document.getElementById('member-list-container');
+            container.innerHTML = '<div class="text-center py-10"><svg class="spinner text-indigo-500" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg></div>';
+            
+            window.showModal('modal-member-list');
+
+            const isId = appData.language === 'id';
+            
+            const promises = r.members.map(async (m) => {
+                const char = m.avatar.emoji || m.name.charAt(0).toUpperCase();
+                const totalDeposit = window.calculateUserDeposit(currentRoomId, m.name);
+                let statusHtml = '';
+
+                if (m.uid === appData.uid) {
+                    statusHtml = `<span class="text-emerald-500 font-bold text-[10px] flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Online (Anda)</span>`;
+                } else {
+                    try {
+                        const userSnap = await getDoc(doc(db, "users", m.uid));
+                        if (userSnap.exists()) {
+                            const data = userSnap.data();
+                            if (data.isOnline) {
+                                statusHtml = `<span class="text-emerald-500 font-bold text-[10px] flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Online</span>`;
+                            } else {
+                                const lastSeenTxt = window.formatLastSeen(data.lastSeen, appData.language);
+                                statusHtml = `<span class="text-slate-400 font-bold text-[10px] flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 inline-block"></span> ${lastSeenTxt}</span>`;
+                            }
+                        } else {
+                            statusHtml = `<span class="text-slate-400 font-bold text-[10px]">-</span>`;
+                        }
+                    } catch (e) {
+                        statusHtml = `<span class="text-slate-400 font-bold text-[10px]">-</span>`;
+                    }
+                }
+
+                return `
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center text-xl font-black shadow-sm shrink-0 ${m.avatar.colorClass} ${m.avatar.textClass}">${char}</div>
+                        <div class="flex-1">
+                            <h4 class="font-black text-slate-800 dark:text-white text-sm leading-tight mb-1">${m.name}</h4>
+                            ${statusHtml}
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex justify-between items-center">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${isId ? 'Total Kontribusi' : 'Total Contribution'}</span>
+                        <span class="font-black text-indigo-600 dark:text-indigo-400 text-sm">Rp ${totalDeposit.toLocaleString('id-ID')}</span>
+                    </div>
+                    <button onclick="window.filterHistoryByUser('${window.safeStr(m.name)}')" class="w-full py-3.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors active:scale-95 flex items-center justify-center gap-2">
+                        ${isId ? 'Lihat Riwayat Transaksi' : 'View Transaction History'} <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>`;
+            });
+
+            const results = await Promise.all(promises);
+            container.innerHTML = results.join('');
+            lucide.createIcons();
+        };
+
+        window.filterHistoryByUser = (userName) => {
+            window.closeAllModals();
+            window.switchRoomTab('ringkasan');
+            currentUserHistoryFilter = userName;
+            
+            refreshRoomUI(currentRoomId);
+
+            setTimeout(() => {
+                const histContainer = document.getElementById('detail-history-list');
+                if (histContainer) {
+                    histContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        };
+
+        window.clearUserHistoryFilter = () => {
+            currentUserHistoryFilter = null;
+            refreshRoomUI(currentRoomId);
+        };
+
+        window.onload = () => {
+            lucide.createIcons();
+            if (appData.darkMode) { document.documentElement.classList.add('dark'); const t = document.getElementById('toggle-dark'); if(t) t.checked = true; }
+            applyTranslations();
+
+            document.querySelectorAll('.money-input').forEach(input => { input.addEventListener('input', function() { const val = this.value.replace(/\D/g, ''); this.value = val ? parseInt(val).toLocaleString('id-ID') : ''; }); });
+            
+            initSwipeToReply();
+        };
+
+    </script>
+</body>
+</html>
